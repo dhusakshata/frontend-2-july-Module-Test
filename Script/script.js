@@ -4,7 +4,7 @@ let searchBtn = document.querySelector(".container__add-city-btn button");
 searchBtn.addEventListener("click", () => {
     let apiKey = "0d37d999b4705308cc960c47e35d754d"
     let inputCityName = document.querySelector(".container__search-input input");
-    getWeatherDetails(apiKey, inputCityName.value.toLocaleLowerCase());
+    getWeatherDetails(apiKey, inputCityName.value.toLocaleLowerCase().trim());
     inputCityName.value = "";
 })
 
@@ -25,12 +25,15 @@ async function getWeatherDetails(apiKey, cityName) {
 let cardsContainer = document.querySelector(".container__weather-cards");
 let weatherImg = document.querySelector(".weather-img img")
 function createCard(cityData) {
+    console.log(cityData);
     let maxTemp = Math.floor(cityData.main.temp_max);
     let minTemp = Math.floor(cityData.main.temp_min);
     let cityName = cityData.name;
     let temperature = Math.floor(cityData.main.temp);
     let weatherType = cityData.weather[0].main;
+    let countryName = getFullCountryName(cityData.sys.country);
     let weatherImgString;
+    
     if (cityData.weather[0].main == "Clouds") 
     {
         weatherImgString = "images/Big/cloudy.png";
@@ -57,9 +60,33 @@ function createCard(cityData) {
         weatherImgString = "images/Big/windy.png";
     }
 
+
+// weather type
+if (cityData.weather[0].main == "Clouds") 
+    {
+        weatherType = "Showers";
+    }
+    if (cityData.weather[0].main == "Haze") 
+    {
+        weatherType = "Fast Wind";
+    }
+
+    if (cityData.weather[0].main == "Drizzle") 
+    {
+        weatherType = "Tornado";
+    }
+    if (cityData.weather[0].main == "Mist") 
+    {
+        weatherType = "Fast Wind";
+    }
+    if (cityData.weather[0].main == "Rain") 
+    {
+        weatherType = "Mild Rain";
+    }
+
     let CardDiv = document.createElement("div");
     CardDiv.classList.add("single-card");
-    CardDiv.classList.add("animate__animated", "animate__fadeIn");
+    CardDiv.classList.add("animate_animated", "animate_fadeIn");
     let cardHtml = `<div class="background-svg">
                         <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -96,16 +123,22 @@ function createCard(cityData) {
                     <div class="single-card-bottom">
                         <div class="card-bottom-left">
                         <div class="atmospheric-pressure">
-                            <div class="atm-pre-high">H:${maxTemp}</div>
-                            <div class="atm-pre-low">L:${minTemp}</div>
+                            <div class="atm-pre-high">H:${maxTemp}°</div>
+                            <div class="atm-pre-low">L:${minTemp}°</div>
                         </div>
-                        <div class="city-name">${cityName}</div>
+                        <div class="city-name">${cityName}, ${countryName}</div>
                         </div>
                         <div class="card-bottom-right">${weatherType}</div>
                     </div>`
              CardDiv.innerHTML = cardHtml;
-             currentCardsArr.push({temperature,CardDiv}); 
-             appendUi(currentCardsArr);  
+             let newObj = {cityName,temperature, CardDiv}
+             const containsObject = currentCardsArr.some(obj => obj.cityName === newObj.cityName);
+             if (containsObject) {
+                 return;
+            } else {
+                 currentCardsArr.push(newObj); 
+                 appendUi(currentCardsArr);  
+             }
 }
 
 function appendUi(currentCardsArr) {
@@ -114,4 +147,42 @@ function appendUi(currentCardsArr) {
     currentCardsArr.forEach((card) => {
         cardsContainer.appendChild(card.CardDiv);
     })
+}
+
+function getFullCountryName(countryCode) {
+    switch (countryCode) {
+        case 'US':
+            return 'United States';
+        case 'CA':
+            return 'Canada';
+        case 'GB':
+            return 'United Kingdom';
+        case 'AU':
+            return 'Australia';
+        case 'DE':
+            return 'Germany';
+        case 'FR':
+            return 'France';
+        case 'JP':
+            return 'Japan';
+        case 'IN':
+            return 'India';
+        case 'CN':
+            return 'China';
+        case 'BR':
+            return 'Brazil';
+        case 'RU':
+            return 'Russia';
+        case 'KR':
+            return 'South Korea';
+        case 'SA':
+            return 'Saudi Arabia';
+        case 'ZA':
+            return 'South Africa';
+        case 'MX':
+            return 'Mexico';
+        // Add more cases for other country codes and names here
+        default:
+            return 'Not Found';
+    }
 }
